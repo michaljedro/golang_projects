@@ -1,24 +1,30 @@
 package main
 
 import (
-    "log"
-    "net/http"
-    "myapp/handlers"
-    "myapp/utils"
+	"log"
+	"myapp/handlers"
+	"myapp/utils"
+	"net/http"
 
-    "github.com/gorilla/mux"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-    utils.InitDB()
-    utils.InitVault()
+    // Initialize the database
+    db, err := utils.NewDB()
+    if err != nil {
+        log.Fatalf("Failed to connect to the database: %v", err)
+    }
 
+    // Initialize the router
     r := mux.NewRouter()
 
-    r.HandleFunc("/users", handlers.CreateUser).Methods("POST")
-    r.HandleFunc("/keys", handlers.CreateKey).Methods("POST")
-    r.HandleFunc("/items", handlers.CreateItem).Methods("POST")
-    r.HandleFunc("/policies", handlers.CreatePolicy).Methods("POST")
+    // Pass the database to handlers
+    handlers.InitializeHandlers(r, db)
 
-    log.Fatal(http.ListenAndServe(":8080", r))
+    // Start the server
+    log.Println("Server running on port 8080")
+    if err := http.ListenAndServe(":8080", r); err != nil {
+        log.Fatalf("Server failed: %v", err)
+    }
 }

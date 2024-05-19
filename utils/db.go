@@ -2,22 +2,13 @@ package utils
 
 import (
     "github.com/jmoiron/sqlx"
-    _ "github.com/kshvakov/clickhouse"
-    "log"
+    _ "github.com/ClickHouse/clickhouse-go"
 )
 
-var DB *sqlx.DB
-
-func InitDB() {
-    var err error
-    DB, err = sqlx.Open("clickhouse", "tcp://localhost:9000?username=default&password=&database=mydb")
+func NewDB() (*sqlx.DB, error) {
+    db, err := sqlx.Open("clickhouse", "tcp://localhost:9000?debug=true")
     if err != nil {
-        log.Fatalln(err)
+        return nil, err
     }
-
-    if err := DB.Ping(); err != nil {
-        log.Fatalln(err)
-    }
-
-    log.Println("Connected to ClickHouse!")
+    return db, nil
 }
